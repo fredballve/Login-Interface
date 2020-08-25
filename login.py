@@ -27,8 +27,10 @@ def register(name,email,password):
         data["name"].append(name)
         data["email"].append(email)
         data["password"].append(password)
+        data_encrypt(key)
         label_warning["text"]="Register successful"
-        clear_entries()
+    clear_entries()
+    print(data)
     
 def check_name(name,email,password):
     """
@@ -40,6 +42,8 @@ def check_name(name,email,password):
         5 = Password must be at least 8 characters
         6 = OK to register
     """
+    if len(data["name"])==0:
+        data_decrypt(key)
     return 6
 
     
@@ -57,15 +61,13 @@ def get_key():
             w_file.write(key)
             key = Fernet(key)
             return key
-        print("error")
     except:
-        print("error")
+        print("error 65")
         
 def data_encrypt(key):
     formated_data = ""
     for i in range(len(data["name"])):
         formated_data += data["name"][i]+ "," + data["email"][i] + "," + data["password"][i] + ";"
-    print(formated_data)
     enc_data = key.encrypt(formated_data.encode())
     with open("data.txt","wb") as w_file:
         w_file.write(enc_data)
@@ -83,23 +85,18 @@ def data_decrypt(key):
             data["name"].append(i)
             data["email"].append(j)
             data["password"].append(k)
-        print(data)
+    except FileNotFoundError:
+        pass
     except:
-        print("Error")
+        ("Error")
 
 data = {"name":[],
         "email":[],
-        "password":[]} 
-"""    
-
-data = {"name":["jao","123"],
-        "email":["bbb","123"],
-        "password":["aaa","123"]}
-"""
+    "password":[]} 
 
 key= get_key()
 #data_encrypt(key)
-data_decrypt(key)
+#data_decrypt(key)
 
 
 root = tk.Tk()
