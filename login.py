@@ -8,45 +8,79 @@ def clear_entries():
     password_entry.delete(0,"end")
 
 def login(name,email,password):
-    if check_name(name,email,password)==0:
+    if check_login(name,email,password)==0:
         label_warning["text"]="Login successful"
-    elif check_name(name,email,password)==1:
+    elif check_login(name,email,password)==1:
         label_warning["text"]="User not found"
-    elif check_name(name,email,password)==2:
+    elif check_login(name,email,password)==2:
+        label_warning["text"]="Invalid Email"
+    elif check_login(name,email,password)==3:
         label_warning["text"]="Wrong Password"
     clear_entries()
     
 def register(name,email,password):
-    if check_name(name,email,password) == 3:
+    if check_register(name,email,password) == 0:
         label_warning["text"]="User already registered"
-    elif check_name(name,email,password) == 4:
-        label_warning["text"]="Invalid Email"
-    elif check_name(name,email,password) == 5:
-        label_warning["text"]="Password must be at least 8 characters"
-    elif check_name(name,email,password) == 6:
+    elif check_register(name,email,password) == 1:
         data["name"].append(name)
         data["email"].append(email)
         data["password"].append(password)
         data_encrypt(key)
         label_warning["text"]="Register successful"
+    elif check_register(name,email,password) == 2:
+        label_warning["text"]="Invalid Email"
+    elif check_register(name,email,password) == 3:
+        label_warning["text"]="Password must be at least 8 characters"
     clear_entries()
-    print(data)
-    
-def check_name(name,email,password):
+    #print(data)
+
+def check_login(name,email,password):
     """
         0 = Login successful
         1 = User not found
-        2 = Wrong Password
-        3 = User already registered
-        4 = Invalid Email
-        5 = Password must be at least 8 characters
-        6 = OK to register
+        2 = Invalid Email
+        3 = Wrong Password
     """
-    if len(data["name"])==0:
-        data_decrypt(key)
-    return 6
+    if len(password)<8:
+            return 3
+    
+    for index in range(len(data["name"])):
+        if data["name"][index] == name:
+            if data["email"][index] == email and len(email)>5:
+                if data["password"][index] == password:
+                    return 0
+                else:
+                    return 3
+            else:
+                return 2
+    return 1
 
     
+def check_register(name,email,password):
+    """
+        0 = User already registered
+        1 = OK to register
+        2 = Invalid Email
+        3 = Password must be at least 8 characters
+    """
+    
+    if len(data["name"])==0:
+        data_decrypt(key)
+    
+    if len(password)<8:
+        return 3
+    if len(email)<5:
+        return 2
+        
+    for index in range(len(data["name"])):
+        if data["name"][index] == name:
+            return 0
+    for index in range(len(data["email"])):
+        if data["email"][index] == email:
+            return 2
+    
+    return 1
+
 
 def get_key():
     try:
@@ -62,7 +96,7 @@ def get_key():
             key = Fernet(key)
             return key
     except:
-        print("error 65")
+        label_warning["text"]="Error"
         
 def data_encrypt(key):
     formated_data = ""
@@ -88,16 +122,13 @@ def data_decrypt(key):
     except FileNotFoundError:
         pass
     except:
-        ("Error")
+        label_warning["text"]="Error"
 
 data = {"name":[],
         "email":[],
     "password":[]} 
 
 key= get_key()
-#data_encrypt(key)
-#data_decrypt(key)
-
 
 root = tk.Tk()
 
@@ -131,4 +162,5 @@ Register_button.place(relx=0.5,rely=0.8,relwidth=.5,relheight=0.2)
 
 label_warning = tk.Label(frame,text="",font=("Courier",10),fg='red')
 label_warning.place(relx=0,rely=0.725,relwidth=1,relheight=0.075)
+
 root.mainloop()
